@@ -23,11 +23,31 @@ void Shader::use()
     glUseProgram(mShaderProgramId);
 }
 
+void Shader::updateUniform2f(const std::string& name, float x, float y)
+{
+    int location = glGetUniformLocation(mShaderProgramId, name.c_str());
+    if (location != -1) {
+        glUniform2f(location, x, y);
+    } else {
+        std::cerr << "Warning: Uniform '" << name << "' not found in shader program." << std::endl;
+    }
+}
+
 void Shader::updateUniform3fv(const std::string& name, const glm::vec3& value)
 {
     int location = glGetUniformLocation(mShaderProgramId, name.c_str());
     if (location != -1) {
         glUniform3fv(location, 1, glm::value_ptr(value));
+    } else {
+        std::cerr << "Warning: Uniform '" << name << "' not found in shader program." << std::endl;
+    }
+}
+
+void Shader::updateUniform3f(const std::string& name, float x, float y, float z)
+{
+    int location = glGetUniformLocation(mShaderProgramId, name.c_str());
+    if (location != -1) {
+        glUniform3f(location, x, y, z);
     } else {
         std::cerr << "Warning: Uniform '" << name << "' not found in shader program." << std::endl;
     }
@@ -48,6 +68,16 @@ void Shader::updateUniform4fv(const std::string& name, const glm::vec4& value)
     int location = glGetUniformLocation(mShaderProgramId, name.c_str());
     if (location != -1) {
         glUniform4fv(location, 1, glm::value_ptr(value));
+    } else {
+        std::cerr << "Warning: Uniform '" << name << "' not found in shader program." << std::endl;
+    }
+}
+
+void Shader::updateUniformMatrix4fv(const std::string& name, const glm::mat4& value)
+{
+    int location = glGetUniformLocation(mShaderProgramId, name.c_str());
+    if (location != -1) {
+        glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
     } else {
         std::cerr << "Warning: Uniform '" << name << "' not found in shader program." << std::endl;
     }

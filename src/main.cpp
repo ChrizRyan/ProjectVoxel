@@ -10,16 +10,20 @@
 
 #include <iostream>
 
+#include "MeshRenderer.h"
 #include "Shader.h"
+#include "Material.h"
 #include "Camera.h"
 #include "Plane.h"
+
+#include "Grid.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 
 unsigned int createShaderFromFile(GLenum shaderType, const std::string& filepath);
 
-void render(Shader *shader, Plane *plane);
+void render(MeshRenderer *meshRenderer);
 
 void initGL();
 
@@ -35,6 +39,8 @@ std::unique_ptr<Camera> camera;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+GLuint textureID;
+
 int main()
 {
     GLFWwindow* window = createGLFWWindow();
@@ -48,8 +54,41 @@ int main()
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &temp);
     std::cout << temp << std::endl;
 
-    std::unique_ptr<Shader> shader = std::make_unique<Shader>("/shaders/vert/basic.vert", "/shaders/frag/basic.frag");
+
+    Grid* grid = new Grid(Vector3Int(10, 10, 10));
+    Camera* camera = new Camera(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
+
+
+
+
+
+    glEnable(GL_TEXTURE_2D);
+
+    // Generate a texture ID
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+ 
+    // Set texture parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    std::vector<GLubyte> initialData(256 * 256 * 4, 0); // RGBA, all black
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, initialData.data());
+
+    std::unique_ptr<Shader> shader = std::make_unique<Shader>("/shaders/vert/basic.vert", "/shaders/frag/voxel_renderer.frag");
     std::unique_ptr<Plane> plane = std::make_unique<Plane>();
+
+    std::unique_ptr<Material> material = std::make_unique<Material>(std::move(shader));
+    material->setBuffer(grid->getData());
+    std::unique_ptr<MeshRenderer> meshRenderer = std::make_unique<MeshRenderer>(std::move(plane), std::move(material));
+
+    
+    meshRenderer->getMaterial()->getShader()->updateUniform3f("u_dimensions", 1, 0.5, 0.2);  
+
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+     
+
+    
 
     // render loop
     // -----------
@@ -62,11 +101,23 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        float radius = 20.0f;
+        glm::vec3 center(5.0f, 5.0f, 5.0f);
+        float camX = static_cast<float>(sin(glfwGetTime()) * radius + center.x);
+        float camZ = static_cast<float>(cos(glfwGetTime()) * radius + center.z);
+
+        glm::mat4 view = glm::mat4(1.0f); 
+        view = glm::lookAt(glm::vec3(camX, 10.0f, camZ), center, glm::vec3(0.0f, 1.0f, 0.0f));
+        meshRenderer->getMaterial()->getShader()->updateUniformMatrix4fv("u_viewMatrix", view);
+        meshRenderer->getMaterial()->getShader()->updateUniform3f("u_dimensions", grid->GetDimensions().x, grid->GetDimensions().y, grid->GetDimensions().z);  
+        meshRenderer->getMaterial()->getShader()->updateUniform2f("u_resolution", SCR_WIDTH, SCR_HEIGHT);
+        meshRenderer->getMaterial()->getShader()->updateUniformMatrix4fv("u_projectionMatrix", projection);
+
         // input
         // -----
         processInput(window);
 
-        render(shader.get(), plane.get());
+        render(meshRenderer.get());
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -116,7 +167,7 @@ GLFWwindow* createGLFWWindow()
     return window;
 }
 
-void render(Shader *shader, Plane *plane)
+void render(MeshRenderer *meshRenderer)
 {
     // render
     // ------
@@ -125,11 +176,11 @@ void render(Shader *shader, Plane *plane)
 \
     // update shader uniform
     double  timeValue = glfwGetTime();
-    float greenValue = static_cast<float>(sin(timeValue) / 2.0 + 0.5);
-    shader->updateUniform4f("ourColor", 1.0f, greenValue, 0.0f, 1.0f);
+    
 
-    shader->use();
-    plane->draw();
+    
+
+    meshRenderer->render();
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly

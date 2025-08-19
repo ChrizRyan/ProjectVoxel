@@ -15,10 +15,18 @@ class Shader
         ~Shader();
 
         void use();
-        void updateUniform3fv(const std::string& name, const glm::vec3& value);
-        void updateUniform4fv(const std::string& name, const glm::vec4& value);
 
+        unsigned int getId() const { return mShaderProgramId; }
+
+        void updateUniform2f(const std::string& name, float x, float y);
+
+        void updateUniform3fv(const std::string& name, const glm::vec3& value);
+        void updateUniform3f(const std::string& name, float x, float y, float z);
+
+        void updateUniform4fv(const std::string& name, const glm::vec4& value);
         void updateUniform4f(const std::string& name, float redValue, float greenValue, float blueValue, float alphaValue);
+
+        void updateUniformMatrix4fv(const std::string& name, const glm::mat4& value);
 
     private:
         void init(const std::string& vertexFilePath, const std::string& fragFilePath);

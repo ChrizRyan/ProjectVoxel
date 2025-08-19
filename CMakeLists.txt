@@ -10,6 +10,9 @@ add_executable(${target_name}
     src/Shader.cpp
     src/FileLoader.cpp
     src/Mesh.cpp
+    src/Material.cpp
+    src/MeshRenderer.cpp
+    src/Grid.cpp
     )
 
 include(FetchContent) 
