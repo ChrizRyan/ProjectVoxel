@@ -33,10 +33,10 @@ void Material::setBuffer(const std::vector<int>& data)
 
 void Material::applyTextures() 
 {
-    for(unsigned int i = 0; i < textures.size(); i++)
-    {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
-    }
-    glActiveTexture(GL_TEXTURE0);
+    // for(unsigned int i = 0; i < textures.size(); i++)
+    // {
+    //     glActiveTexture(GL_TEXTURE0 + i);
+    //     glBindTexture(GL_TEXTURE_2D, textures[i].id);
+    // }
+    // glActiveTexture(GL_TEXTURE0);
 }

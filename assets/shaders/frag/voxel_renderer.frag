@@ -194,7 +194,7 @@ vec3 getCameraPosition(mat4 viewMatrix)
 
 void main()
 {
-    FragColor = vec4(0.2,0,0.2,0);//default color
+    FragColor = vec4(0.05,0.05,0.15,1);//default color
 
     vec2 ndc = gl_FragCoord.xy/u_resolution*2.0 - 1.0;
     vec4 clipSpacePoint = vec4(ndc.x, ndc.y, 1.0, 1.0);
@@ -223,13 +223,13 @@ void main()
 
         currentVoxel = getVoxel(currentCoords, hitLocation, rayDir);
 
-        if (currentVoxel.color.a <= 0.01f)
+        if (currentVoxel.color.a == 0)
         {
             currentVoxel = traceByIndex(rayDir, cameraPos, currentCoords, raybounds);
         }
 
 
-        if (currentVoxel.color.a != 0)
+        //if (currentVoxel.color.a != 0)
         {
             vec3 finalColor = vec3(0.1, 0.1, 0.15); // Ambient light
             //for (int i = 0; i < 4; i++)
@@ -264,6 +264,4 @@ void main()
             FragColor = vec4(finalColor, currentVoxel.color.a);
         }
     }
-
-       //FragColor = vec4(abs(rayDir), 1);
 }  

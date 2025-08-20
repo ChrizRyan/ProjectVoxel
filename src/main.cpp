@@ -55,7 +55,7 @@ int main()
     std::cout << temp << std::endl;
 
 
-    Grid* grid = new Grid(Vector3Int(10, 10, 10));
+    Grid* grid = new Grid(Vector3Int(100, 10, 100));
     Camera* camera = new Camera(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
 
 
@@ -82,36 +82,33 @@ int main()
     material->setBuffer(grid->getData());
     std::unique_ptr<MeshRenderer> meshRenderer = std::make_unique<MeshRenderer>(std::move(plane), std::move(material));
 
-    
+    meshRenderer->getMaterial()->getShader()->use();
     meshRenderer->getMaterial()->getShader()->updateUniform3f("u_dimensions", 1, 0.5, 0.2);  
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-     
-
-    
+    meshRenderer->getMaterial()->getShader()->updateUniform3f("u_dimensions", grid->GetDimensions().x, grid->GetDimensions().y, grid->GetDimensions().z);  
+    meshRenderer->getMaterial()->getShader()->updateUniform2f("u_resolution", SCR_WIDTH, SCR_HEIGHT);
+    meshRenderer->getMaterial()->getShader()->updateUniformMatrix4fv("u_projectionMatrix", projection);
 
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
-
         // per-frame time logic
         // --------------------
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        float radius = 20.0f;
-        glm::vec3 center(5.0f, 5.0f, 5.0f);
+
+        float radius = 50.0f;
+        glm::vec3 center(50.0f, 5.0f, 50.0f);
         float camX = static_cast<float>(sin(glfwGetTime()) * radius + center.x);
         float camZ = static_cast<float>(cos(glfwGetTime()) * radius + center.z);
 
         glm::mat4 view = glm::mat4(1.0f); 
-        view = glm::lookAt(glm::vec3(camX, 10.0f, camZ), center, glm::vec3(0.0f, 1.0f, 0.0f));
+        view = glm::lookAt(glm::vec3(camX, 90.0f, camZ), center, glm::vec3(0.0f, 1.0f, 0.0f));
         meshRenderer->getMaterial()->getShader()->updateUniformMatrix4fv("u_viewMatrix", view);
-        meshRenderer->getMaterial()->getShader()->updateUniform3f("u_dimensions", grid->GetDimensions().x, grid->GetDimensions().y, grid->GetDimensions().z);  
-        meshRenderer->getMaterial()->getShader()->updateUniform2f("u_resolution", SCR_WIDTH, SCR_HEIGHT);
-        meshRenderer->getMaterial()->getShader()->updateUniformMatrix4fv("u_projectionMatrix", projection);
 
         // input
         // -----

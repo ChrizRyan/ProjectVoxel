@@ -18,8 +18,6 @@ Mesh::~Mesh() {
 
 void Mesh::draw() 
 {
-
-
     // draw mesh
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
